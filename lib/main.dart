@@ -12,6 +12,21 @@ void main() async {
   runApp(const MyApp());
 }
 
+Future<void> _autoLogin() async {
+  try {
+    if (FirebaseAuth.instance.currentUser == null) {
+      // Usuário não logado, fazer login com credenciais padrão
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: "admin@gmail.com",
+        password: "admin1", // Garanta que este usuário existe no Firebase
+      );
+    }
+  } catch (e) {
+    // Em caso de erro, exiba no console
+    print("Erro no login automático: $e");
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
