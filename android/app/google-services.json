@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "798791617950",
+    "firebase_url": "https://abastecimentoflutter-default-rtdb.firebaseio.com",
+    "project_id": "abastecimentoflutter",
+    "storage_bucket": "abastecimentoflutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798791617950:android:afd4fa05f8d10212b31a8f",
+        "android_client_info": {
+          "package_name": "com.abastecimento.flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH_5fa8A7QYBjgsZD9wjS-440E7E4F9Qc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
