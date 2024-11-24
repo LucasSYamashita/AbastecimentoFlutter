@@ -87,8 +87,8 @@ class _MainAppState extends State<MainApp> {
       ),
       body: [
         const HomeView(),
-        const MyVehiclesView(),
-        const AddVehicleView(),
+        MyVehiclesView(),
+        AddVehicleView(),
         const RefuelHistoryView(),
         const ProfileView(),
       ][_selectedIndex],

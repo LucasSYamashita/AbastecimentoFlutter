@@ -1,16 +1,19 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:abastecimentoflutter/views/login.dart'; // Importando a tela de login
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login.dart';
 
 class RegisterView extends StatelessWidget {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Register')),
+      appBar: AppBar(
+        title: const Text('Register'),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -19,8 +22,8 @@ class RegisterView extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.person_add, size: 100, color: Colors.orange),
-                SizedBox(height: 16),
+                const Icon(Icons.person_add, size: 100, color: Colors.orange),
+                const SizedBox(height: 16),
                 _buildTextField(
                   controller: emailController,
                   hintText: 'E-mail',
@@ -32,7 +35,7 @@ class RegisterView extends StatelessWidget {
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 _buildTextField(
                   controller: passwordController,
                   hintText: 'Password',
@@ -44,7 +47,19 @@ class RegisterView extends StatelessWidget {
                     return null;
                   },
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: confirmPasswordController,
+                  hintText: 'Confirm Password',
+                  obscureText: true,
+                  validator: (value) {
+                    if (value != passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
@@ -55,29 +70,32 @@ class RegisterView extends StatelessWidget {
                           password: passwordController.text.trim(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Registration successful!')),
+                          const SnackBar(
+                              content: Text('Conta criada com sucesso!')),
                         );
+                        // Após cadastro bem-sucedido, redireciona para o login
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => LoginView()),
+                          MaterialPageRoute(
+                            builder: (context) => LoginView(),
+                          ),
                         );
                       } on FirebaseAuthException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.message ?? 'Error')),
+                          SnackBar(
+                              content: Text(e.message ?? 'Algo deu errado')),
                         );
                       }
                     }
                   },
-                  child: Text('Register'),
+                  child: const Text('Registro'),
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginView()),
-                    );
+                    // Volta para a tela de login
+                    Navigator.pop(context);
                   },
-                  child: Text("Already have an account? Login"),
+                  child: const Text('Already have an account? Login'),
                 ),
               ],
             ),
@@ -97,7 +115,7 @@ class RegisterView extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
       ),
       obscureText: obscureText,
       validator: validator,
