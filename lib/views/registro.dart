@@ -8,6 +8,8 @@ class RegisterView extends StatelessWidget {
   final confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  RegisterView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,90 +1,104 @@
+import 'package:abastecimentoflutter/views/screens/addveiculo.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class Vehicle {
-  final String nome;
-  final String modelo;
-  final String ano;
-  final String placa;
+class MeusVeiculosView extends StatefulWidget {
+  const MeusVeiculosView({Key? key}) : super(key: key);
 
-  Vehicle(
-      {required this.nome,
-      required this.modelo,
-      required this.ano,
-      required this.placa});
+  @override
+  State<MeusVeiculosView> createState() => _MeusVeiculosViewState();
 }
 
-class MyVehiclesView extends StatelessWidget {
-  final List<Vehicle> vehicles = [
-    Vehicle(
-        nome: 'Carro 1', modelo: 'Modelo A', ano: '2020', placa: 'ABC-1234'),
-    Vehicle(
-        nome: 'Carro 2', modelo: 'Modelo B', ano: '2021', placa: 'XYZ-5678'),
-    Vehicle(
-        nome: 'Carro 3', modelo: 'Modelo C', ano: '2019', placa: 'JKL-9101'),
-  ];
+class _MeusVeiculosViewState extends State<MeusVeiculosView> {
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Meus Veículos')),
-      body: vehicles.isEmpty
-          ? Center(child: Text('Nenhum veículo cadastrado.'))
-          : ListView.builder(
-              itemCount: vehicles.length,
-              itemBuilder: (context, index) {
-                Vehicle vehicle = vehicles[index];
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.all(16),
-                    leading: Icon(Icons.directions_car, color: Colors.orange),
-                    title: Text(vehicle.nome,
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Modelo: ${vehicle.modelo}'),
-                        Text('Ano: ${vehicle.ano}'),
-                        Text('Placa: ${vehicle.placa}'),
-                      ],
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  EditVehicleView(vehicleId: 'veículo_id')),
-                        );
-                      },
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                EditVehicleView(vehicleId: 'veículo_id')),
+      appBar: AppBar(
+        title: const Text('Meus Veículos'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('veiculos')
+            .where('usuarioId',
+                isEqualTo: user?.uid) // Filtra veículos do usuário logado
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Erro ao carregar veículos.'));
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('Nenhum veículo cadastrado.'));
+          }
+
+          final veiculos = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: veiculos.length,
+            itemBuilder: (context, index) {
+              final veiculo = veiculos[index];
+              return Card(
+                margin: const EdgeInsets.all(8),
+                child: ListTile(
+                  title: Text(veiculo['nome']),
+                  subtitle: Text('Placa: ${veiculo['placa']}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () async {
+                      bool? confirmDelete = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Confirmar Exclusão'),
+                          content: const Text(
+                              'Você tem certeza que deseja excluir este veículo?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Excluir'),
+                            ),
+                          ],
+                        ),
                       );
+
+                      if (confirmDelete == true) {
+                        await FirebaseFirestore.instance
+                            .collection('veiculos')
+                            .doc(veiculo.id)
+                            .delete();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Veículo excluído com sucesso.')),
+                        );
+                      }
                     },
                   ),
-                );
-              },
-            ),
-    );
-  }
-}
-
-class EditVehicleView extends StatelessWidget {
-  final String vehicleId;
-  EditVehicleView({required this.vehicleId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Editar Veículo')),
-      body: Center(child: Text('Tela de edição para o veículo $vehicleId')),
+                ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Ao clicar no botão flutuante, leva para a tela de adicionar novo veículo
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    AddVehicleView()), // Chama a tela correta para adicionar veículo
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

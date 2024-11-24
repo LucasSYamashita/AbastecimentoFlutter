@@ -5,6 +5,8 @@ class ForgotPasswordView extends StatelessWidget {
   final emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  ForgotPasswordView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

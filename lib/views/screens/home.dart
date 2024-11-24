@@ -5,7 +5,7 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Text(
         'Tela Principal - Home',
         style: TextStyle(fontSize: 24),

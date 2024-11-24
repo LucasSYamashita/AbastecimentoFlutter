@@ -9,6 +9,8 @@ class LoginView extends StatelessWidget {
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  LoginView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,8 +62,7 @@ class LoginView extends StatelessWidget {
                         );
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const MainApp()),
+                          MaterialPageRoute(builder: (context) => MainApp()),
                         );
                       } on FirebaseAuthException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(

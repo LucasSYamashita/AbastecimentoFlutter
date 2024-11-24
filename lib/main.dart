@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             if (snapshot.hasData) {
-              return const MainApp(); // Se estiver logado, vai para o MainApp
+              return MainApp(); // Se estiver logado, vai para o MainApp
             } else {
               return LoginView(); // Remover o 'const' aqui
             }

@@ -1,97 +1,102 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:abastecimentoflutter/views/screens/home.dart';
 import 'package:abastecimentoflutter/views/screens/meusveiculos.dart';
 import 'package:abastecimentoflutter/views/screens/addveiculo.dart';
 import 'package:abastecimentoflutter/views/screens/historico.dart';
 import 'package:abastecimentoflutter/views/screens/perfil.dart';
+import 'package:abastecimentoflutter/widgets/custom_drawer.dart'; // Importando o CustomDrawer
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
   @override
-  State<MainApp> createState() => _MainAppState();
+  _MainAppState createState() => _MainAppState();
 }
 
 class _MainAppState extends State<MainApp> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // Índice da página selecionada
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _user;
 
+  @override
+  void initState() {
+    super.initState();
+    _auth.authStateChanges().listen((user) {
+      setState(() {
+        _user = user;
+      });
+    });
+  }
+
+  // Método para alterar o índice da página
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  // Função para logout
+  void _logout() async {
+    await _auth.signOut();
+    Navigator.pushReplacementNamed(
+        context, '/login'); // Redireciona para a tela de login
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text([
-          "Home",
-          "Meus Veículos",
-          "Adicionar Veículo",
-          "Histórico de Abastecimentos",
-          "Perfil"
-        ][_selectedIndex]),
+        title: const Text('Controle de Abastecimento'),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.orange),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                      FirebaseAuth.instance.currentUser!.displayName ?? "User"),
-                  Text(FirebaseAuth.instance.currentUser!.email!),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Home'),
-              onTap: () => _onItemTapped(0),
-            ),
-            ListTile(
-              leading: Icon(Icons.directions_car),
-              title: Text('Meus Veículos'),
-              onTap: () => _onItemTapped(1),
-            ),
-            ListTile(
-              leading: Icon(Icons.add_circle),
-              title: Text('Adicionar Veículo'),
-              onTap: () => _onItemTapped(2),
-            ),
-            ListTile(
-              leading: Icon(Icons.history),
-              title: Text('Histórico de Abastecimentos'),
-              onTap: () => _onItemTapped(3),
-            ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Perfil'),
-              onTap: () => _onItemTapped(4),
-            ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
-              onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-            ),
-          ],
-        ),
+      drawer: CustomDrawer(
+          onItemTapped: _onItemTapped), // Passando a função de navegação
+      body: _getBody(), // Corpos das páginas baseados no índice selecionado
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex, // Indica qual aba está selecionada
+        onTap: _onItemTapped, // Altera a tela ao tocar em uma aba
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.directions_car),
+            label: 'Meus Veículos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle),
+            label: 'Adicionar Veículo',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'Histórico',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+        ],
       ),
-      body: [
-        const HomeView(),
-        MyVehiclesView(),
-        AddVehicleView(),
-        const RefuelHistoryView(),
-        const ProfileView(),
-      ][_selectedIndex],
     );
+  }
+
+  // Método que retorna a tela correspondente ao índice selecionado
+  Widget _getBody() {
+    switch (_selectedIndex) {
+      case 0:
+        return const HomeView();
+      case 1:
+        return const MeusVeiculosView();
+      case 2:
+        return AddVehicleView();
+      case 3:
+        return const HistoricoAbastecimentoView(
+            vehicleId: ''); // Passe o vehicleId conforme necessário
+      case 4:
+        return const ProfileView();
+      default:
+        return const HomeView(); // Tela padrão
+    }
   }
 }

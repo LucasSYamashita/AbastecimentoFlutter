@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class EditVehicleView extends StatelessWidget {
   final String vehicleId;
 
-  EditVehicleView({required this.vehicleId});
+  EditVehicleView({super.key, required this.vehicleId});
 
   final nomeController = TextEditingController();
   final modeloController = TextEditingController();
@@ -13,35 +13,35 @@ class EditVehicleView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Editar Veículo')),
+      appBar: AppBar(title: const Text('Editar Veículo')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
             TextField(
                 controller: nomeController,
-                decoration: InputDecoration(hintText: 'Nome do Veículo')),
-            SizedBox(height: 16),
+                decoration: const InputDecoration(hintText: 'Nome do Veículo')),
+            const SizedBox(height: 16),
             TextField(
                 controller: modeloController,
-                decoration: InputDecoration(hintText: 'Modelo')),
-            SizedBox(height: 16),
+                decoration: const InputDecoration(hintText: 'Modelo')),
+            const SizedBox(height: 16),
             TextField(
                 controller: anoController,
-                decoration: InputDecoration(hintText: 'Ano')),
-            SizedBox(height: 16),
+                decoration: const InputDecoration(hintText: 'Ano')),
+            const SizedBox(height: 16),
             TextField(
                 controller: placaController,
-                decoration: InputDecoration(hintText: 'Placa')),
-            SizedBox(height: 24),
+                decoration: const InputDecoration(hintText: 'Placa')),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
                 // Lógica para salvar as alterações no veículo
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Veículo atualizado com sucesso!')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Veículo atualizado com sucesso!')));
                 Navigator.pop(context);
               },
-              child: Text('Salvar Alterações'),
+              child: const Text('Salvar Alterações'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -49,30 +49,31 @@ class EditVehicleView extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text('Excluir Veículo'),
-                    content:
-                        Text('Tem certeza que deseja excluir este veículo?'),
+                    title: const Text('Excluir Veículo'),
+                    content: const Text(
+                        'Tem certeza que deseja excluir este veículo?'),
                     actions: [
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text('Cancelar'),
+                        child: const Text('Cancelar'),
                       ),
                       TextButton(
                         onPressed: () {
                           // Excluir o veículo
                           ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Veículo excluído!')));
+                              const SnackBar(
+                                  content: Text('Veículo excluído!')));
                           Navigator.pop(context);
                         },
-                        child: Text('Excluir'),
+                        child: const Text('Excluir'),
                       ),
                     ],
                   ),
                 );
               },
-              child: Text('Excluir Veículo'),
+              child: const Text('Excluir Veículo'),
             ),
           ],
         ),

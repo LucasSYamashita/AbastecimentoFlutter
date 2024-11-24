@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:abastecimentoflutter/views/login.dart';
 
 class CustomDrawer extends StatelessWidget {
+  final Function(int) onItemTapped; // Função para alterar o índice da tela
+
+  CustomDrawer({super.key, required this.onItemTapped});
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Colors.orange),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -18,7 +26,7 @@ class CustomDrawer extends StatelessWidget {
                   child: Icon(
                     Icons.person,
                     size: 50,
-                    color: Colors.blue,
+                    color: Colors.orange,
                   ),
                 ),
                 SizedBox(height: 8),
@@ -34,46 +42,55 @@ class CustomDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home'),
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
             onTap: () {
-              // Navegação para a tela principal
+              onItemTapped(0); // Muda para a tela Home
+              Navigator.pop(context); // Fecha o drawer
             },
           ),
           ListTile(
-            leading: Icon(Icons.directions_car),
-            title: Text('Meus Veículos'),
+            leading: const Icon(Icons.directions_car),
+            title: const Text('Meus Veículos'),
             onTap: () {
-              // Navegação para a lista de veículos
+              onItemTapped(1); // Muda para a tela Meus Veículos
+              Navigator.pop(context); // Fecha o drawer
             },
           ),
           ListTile(
-            leading: Icon(Icons.add_circle),
-            title: Text('Adicionar Veículo'),
+            leading: const Icon(Icons.add_circle),
+            title: const Text('Adicionar Veículo'),
             onTap: () {
-              // Navegação para o formulário de cadastro de veículo
+              onItemTapped(2); // Muda para a tela Adicionar Veículo
+              Navigator.pop(context); // Fecha o drawer
             },
           ),
           ListTile(
-            leading: Icon(Icons.history),
-            title: Text('Histórico de Abastecimentos'),
+            leading: const Icon(Icons.history),
+            title: const Text('Histórico de Abastecimentos'),
             onTap: () {
-              // Navegação para o histórico geral
+              onItemTapped(3); // Muda para a tela Histórico
+              Navigator.pop(context); // Fecha o drawer
             },
           ),
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Perfil'),
+            leading: const Icon(Icons.person),
+            title: const Text('Perfil'),
             onTap: () {
-              // Navegação para a tela de perfil do usuário
+              onItemTapped(4); // Muda para a tela Perfil
+              Navigator.pop(context); // Fecha o drawer
             },
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
-            onTap: () {
-              // Ação de logout
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+            onTap: () async {
+              await _auth.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginView()),
+              );
             },
           ),
         ],
