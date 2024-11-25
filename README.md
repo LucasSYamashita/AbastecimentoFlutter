@@ -1,16 +1,46 @@
-# abastecimentoflutter
+# Controle de Abastecimento de Veículos - Flutter
 
-A new Flutter project.
+Este é um aplicativo móvel desenvolvido em Flutter para o controle de abastecimento de veículos. Ele permite que os usuários cadastrem seus veículos, registrem abastecimentos, visualizem o histórico de abastecimentos e editem os dados dos veículos.
 
-## Getting Started
+## Funcionalidades
 
-This project is a starting point for a Flutter application.
+- **Cadastro de Veículos**: Os usuários podem adicionar e editar veículos, incluindo informações como nome, modelo, placa e ano de fabricação.
+- **Registro de Abastecimentos**: O aplicativo permite que os usuários registrem abastecimentos, incluindo dados como quantidade de litros, quilometragem atual e data.
+- **Histórico de Abastecimentos**: O histórico completo de abastecimentos é exibido, com a possibilidade de visualizar os detalhes de cada abastecimento.
+- **Autenticação com Firebase**: O aplicativo utiliza a autenticação do Firebase para permitir que os usuários se registrem e façam login.
+- **Armazenamento no Firestore**: Dados dos veículos e abastecimentos são armazenados no Firebase Firestore.
 
-A few resources to get you started if this is your first Flutter project:
+## Tecnologias Utilizadas
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter: Framework para desenvolvimento de aplicativos móveis.
+- Firebase: Usado para autenticação de usuários e armazenamento de dados (Firestore).
+- Provider: Para gerenciar o estado do aplicativo.
+- Dart: Linguagem de programação utilizada no Flutter.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Instalação
+
+Clone o repositório para sua máquina local:
+   git clone https://github.com/LucasSYamashita/abastecimentoflutter.git
+
+Navegue até o diretório do projeto:
+cd abastecimentoflutter
+
+Instale as dependências do projeto:
+flutter pub get
+
+## Configure o Firebase:
+Crie um novo projeto no Firebase Console.
+Adicione seu aplicativo Flutter ao projeto Firebase (Android/iOS).
+Configure o Firebase Firestore e Firebase Authentication.
+Baixe o arquivo google-services.json (para Android) ou GoogleService-Info.plist (para iOS) e coloque-os nas pastas apropriadas do seu projeto
+
+Execute o aplicativo:
+
+flutter run
+
+# Como Usar
+Tela de Login: Insira suas credenciais para fazer login ou registre-se para criar uma nova conta.
+Tela de Veículos: Visualize todos os veículos cadastrados e adicione novos veículos. Você pode editar os veículos existentes também.
+Tela de Abastecimento: Registre os abastecimentos dos veículos com detalhes como litros, quilometragem e data.
+Tela de Histórico de Abastecimento: Consulte todos os abastecimentos realizados com informações detalhadas.
+
