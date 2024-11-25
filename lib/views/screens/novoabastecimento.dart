@@ -1,121 +1,113 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class NovoAbastecimentoView extends StatefulWidget {
   final String vehicleId;
 
-  const NovoAbastecimentoView({super.key, required this.vehicleId});
+  const NovoAbastecimentoView({Key? key, required this.vehicleId})
+      : super(key: key);
 
   @override
   _NovoAbastecimentoViewState createState() => _NovoAbastecimentoViewState();
 }
 
 class _NovoAbastecimentoViewState extends State<NovoAbastecimentoView> {
+  final _formKey = GlobalKey<FormState>();
   final _litrosController = TextEditingController();
   final _quilometragemController = TextEditingController();
-  final _dataController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
 
-  // Método para construir os campos de entrada
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required TextInputType keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hintText,
-          border: const OutlineInputBorder(),
-        ),
-        keyboardType: keyboardType,
-        validator: validator,
-      ),
-    );
-  }
+  Future<void> _salvarAbastecimento() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
 
-  // Método para enviar o formulário
-  void _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        // Salvar o abastecimento no Firestore
-        await FirebaseFirestore.instance.collection('abastecimentos').add({
-          'vehicleId': widget.vehicleId,
-          'litros': double.parse(_litrosController.text),
-          'quilometragem': int.parse(_quilometragemController.text),
-          'data': _dataController.text,
-          'usuarioId': FirebaseAuth.instance.currentUser!.uid,
-          'timestamp': Timestamp.now(),
-        });
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuário não autenticado')),
+      );
+      return;
+    }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Abastecimento registrado com sucesso!')),
-        );
+    final litros = double.tryParse(_litrosController.text);
+    final quilometragem = int.tryParse(_quilometragemController.text);
 
-        // Voltar para a tela anterior
-        Navigator.pop(context);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao registrar abastecimento: $e')),
-        );
-      }
+    if (litros == null || quilometragem == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos corretamente')),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(uid)
+          .collection('veiculos')
+          .doc(widget.vehicleId)
+          .collection('abastecimentos')
+          .add({
+        'litros': litros,
+        'quilometragem': quilometragem,
+        'data': FieldValue.serverTimestamp(),
+        'vehicleId': widget.vehicleId,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Abastecimento registrado com sucesso!')),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar abastecimento: $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Novo Abastecimento'),
-      ),
+      appBar: AppBar(title: const Text('Novo Abastecimento')),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTextField(
+              TextFormField(
                 controller: _litrosController,
-                hintText: 'Quantidade de Litros',
+                decoration: const InputDecoration(labelText: 'Litros'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Campo obrigatório';
+                    return 'Por favor, insira a quantidade de litros';
                   }
                   return null;
                 },
               ),
-              _buildTextField(
+              TextFormField(
                 controller: _quilometragemController,
-                hintText: 'Quilometragem Atual',
+                decoration: const InputDecoration(labelText: 'Quilometragem'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Campo obrigatório';
-                  }
-                  return null;
-                },
-              ),
-              _buildTextField(
-                controller: _dataController,
-                hintText: 'Data (dd/mm/aaaa)',
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Campo obrigatório';
+                    return 'Por favor, insira a quilometragem';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Registrar Abastecimento'),
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    _salvarAbastecimento();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.orange,
+                ),
+                child: const Text('Salvar Abastecimento'),
               ),
             ],
           ),

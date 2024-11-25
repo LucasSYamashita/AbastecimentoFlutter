@@ -14,7 +14,7 @@ class RegisterView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register'),
+        title: const Text('Registro'),
       ),
       body: Center(
         child: Padding(
@@ -32,7 +32,7 @@ class RegisterView extends StatelessWidget {
                   validator: (value) {
                     if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
                         .hasMatch(value!)) {
-                      return 'Enter a valid email';
+                      return 'Entre com um email valido';
                     }
                     return null;
                   },
@@ -40,11 +40,11 @@ class RegisterView extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: passwordController,
-                  hintText: 'Password',
+                  hintText: 'Senha',
                   obscureText: true,
                   validator: (value) {
                     if (value!.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return 'A senha deve ter mais de 6 caracteres';
                     }
                     return null;
                   },
@@ -52,11 +52,11 @@ class RegisterView extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: confirmPasswordController,
-                  hintText: 'Confirm Password',
+                  hintText: 'Comfirmar senha',
                   obscureText: true,
                   validator: (value) {
                     if (value != passwordController.text) {
-                      return 'Passwords do not match';
+                      return 'As senhas nao são iguais';
                     }
                     return null;
                   },
@@ -75,7 +75,6 @@ class RegisterView extends StatelessWidget {
                           const SnackBar(
                               content: Text('Conta criada com sucesso!')),
                         );
-                        // Após cadastro bem-sucedido, redireciona para o login
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -90,14 +89,17 @@ class RegisterView extends StatelessWidget {
                       }
                     }
                   },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.orange,
+                  ),
                   child: const Text('Registro'),
                 ),
                 TextButton(
                   onPressed: () {
-                    // Volta para a tela de login
                     Navigator.pop(context);
                   },
-                  child: const Text('Already have an account? Login'),
+                  child: const Text('Ja possui uma conta? Entrar'),
                 ),
               ],
             ),

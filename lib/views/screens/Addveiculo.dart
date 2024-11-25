@@ -1,58 +1,109 @@
+import 'package:abastecimentoflutter/views/screens/detalhesveiculos.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class AddVehicleView extends StatefulWidget {
-  const AddVehicleView({Key? key}) : super(key: key);
+class AdicionarVeiculoView extends StatefulWidget {
+  final String? vehicleId;
+
+  const AdicionarVeiculoView({Key? key, this.vehicleId}) : super(key: key);
 
   @override
-  State<AddVehicleView> createState() => _AddVehicleViewState();
+  State<AdicionarVeiculoView> createState() => _AdicionarVeiculoViewState();
 }
 
-class _AddVehicleViewState extends State<AddVehicleView> {
-  final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _modeloController = TextEditingController();
-  final TextEditingController _anoController = TextEditingController();
-  final TextEditingController _placaController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+class _AdicionarVeiculoViewState extends State<AdicionarVeiculoView> {
+  final _formKey = GlobalKey<FormState>();
+  final _nomeController = TextEditingController();
+  final _modeloController = TextEditingController();
+  final _placaController = TextEditingController();
+  final _anoController = TextEditingController();
 
-  Future<void> _adicionarVeiculo() async {
-    final user = _auth.currentUser;
-
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuário não autenticado.')),
-      );
-      return;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.vehicleId != null) {
+      _carregarDadosVeiculo();
     }
+  }
 
-    if (_nomeController.text.isEmpty ||
-        _modeloController.text.isEmpty ||
-        _anoController.text.isEmpty ||
-        _placaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos.')),
-      );
-      return;
-    }
+  Future<void> _carregarDadosVeiculo() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || widget.vehicleId == null) return;
 
     try {
-      await FirebaseFirestore.instance.collection('veiculos').add({
-        'nome': _nomeController.text,
-        'modelo': _modeloController.text,
-        'ano': int.parse(_anoController.text),
-        'placa': _placaController.text,
-        'usuarioId': user.uid,
-      });
+      final doc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(uid)
+          .collection('veiculos')
+          .doc(widget.vehicleId)
+          .get();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veículo adicionado com sucesso.')),
-      );
-
-      Navigator.pop(context);
+      if (doc.exists) {
+        final veiculo = doc.data();
+        _nomeController.text = veiculo?['nome'] ?? '';
+        _modeloController.text = veiculo?['modelo'] ?? '';
+        _placaController.text = veiculo?['placa'] ?? '';
+        _anoController.text = veiculo?['ano']?.toString() ?? '';
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Dados do veículo não encontrados!')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao adicionar veículo.')),
+        const SnackBar(content: Text('Erro ao carregar dados do veículo!')),
+      );
+    }
+  }
+
+  Future<void> _salvarVeiculo() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final veiculoData = {
+      'nome': _nomeController.text.trim(),
+      'modelo': _modeloController.text.trim(),
+      'placa': _placaController.text.trim(),
+      'ano': int.tryParse(_anoController.text.trim()) ?? 0,
+    };
+
+    String? newVehicleId = widget.vehicleId;
+
+    try {
+      if (widget.vehicleId != null) {
+        await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(uid)
+            .collection('veiculos')
+            .doc(widget.vehicleId)
+            .update(veiculoData);
+      } else {
+        final docRef = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(uid)
+            .collection('veiculos')
+            .add(veiculoData);
+        newVehicleId = docRef.id;
+      }
+
+      if (newVehicleId != null && newVehicleId.isNotEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetalhesVeiculoView(
+              vehicleId: newVehicleId!,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao salvar o veículo!')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao salvar o veículo!')),
       );
     }
   }
@@ -61,60 +112,77 @@ class _AddVehicleViewState extends State<AddVehicleView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adicionar Veículo'),
+        title: Text(
+          widget.vehicleId == null ? 'Adicionar Veículo' : 'Editar Veículo',
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nomeController,
-              decoration: const InputDecoration(labelText: 'Nome do Veículo'),
-            ),
-            TextField(
-              controller: _modeloController,
-              decoration: const InputDecoration(labelText: 'Modelo'),
-            ),
-            TextField(
-              controller: _anoController,
-              decoration: const InputDecoration(labelText: 'Ano'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _placaController,
-              decoration: const InputDecoration(labelText: 'Placa'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _adicionarVeiculo,
-              child: const Text('Salvar'),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nomeController,
+                decoration: const InputDecoration(labelText: 'Nome'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nome é obrigatório';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _modeloController,
+                decoration: const InputDecoration(labelText: 'Modelo'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Modelo é obrigatório';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _placaController,
+                decoration: const InputDecoration(labelText: 'Placa'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Placa é obrigatória';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _anoController,
+                decoration: const InputDecoration(labelText: 'Ano'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Ano é obrigatório';
+                  }
+                  final ano = int.tryParse(value);
+                  if (ano == null || ano < 1886 || ano > DateTime.now().year) {
+                    return 'Ano inválido';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    _salvarVeiculo();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.orange,
+                ),
+                child: Text(widget.vehicleId == null ? 'Salvar' : 'Atualizar'),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hintText,
-          border: const OutlineInputBorder(),
-        ),
-        keyboardType: keyboardType,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Campo obrigatório';
-          }
-          return null;
-        },
       ),
     );
   }

@@ -10,7 +10,7 @@ class ForgotPasswordView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Forgot Password')),
+      appBar: AppBar(title: const Text('Esqueci a senha')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -22,7 +22,7 @@ class ForgotPasswordView extends StatelessWidget {
                 const Icon(Icons.email, size: 100, color: Colors.orange),
                 const SizedBox(height: 16),
                 const Text(
-                  'Enter your email to reset your password',
+                  'Informe um email para recuperação',
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 16),
@@ -32,7 +32,7 @@ class ForgotPasswordView extends StatelessWidget {
                   validator: (value) {
                     if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
                         .hasMatch(value!)) {
-                      return 'Enter a valid email';
+                      return 'Entre com um email valido';
                     }
                     return null;
                   },
@@ -46,18 +46,22 @@ class ForgotPasswordView extends StatelessWidget {
                           email: emailController.text.trim(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Password reset email sent!')),
+                          const SnackBar(content: Text('Email enviado!')),
                         );
                         Navigator.pop(context);
                       } on FirebaseAuthException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.message ?? 'Error')),
+                          SnackBar(
+                              content: Text(e.message ?? 'Algo deu errado')),
                         );
                       }
                     }
                   },
-                  child: const Text('Send Reset Email'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.orange,
+                  ),
+                  child: const Text('Enviar email de recuperação'),
                 ),
               ],
             ),

@@ -31,7 +31,7 @@ class LoginView extends StatelessWidget {
                   validator: (value) {
                     if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
                         .hasMatch(value!)) {
-                      return 'Enter a valid email';
+                      return 'Email invalido';
                     }
                     return null;
                   },
@@ -39,11 +39,11 @@ class LoginView extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: passwordController,
-                  hintText: 'Password',
+                  hintText: 'Senha',
                   obscureText: true,
                   validator: (value) {
                     if (value!.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return 'Senha errada';
                     }
                     return null;
                   },
@@ -58,7 +58,8 @@ class LoginView extends StatelessWidget {
                           password: passwordController.text.trim(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Login successful!')),
+                          const SnackBar(
+                              content: Text('Login feito com sucesso!')),
                         );
                         Navigator.pushReplacement(
                           context,
@@ -66,11 +67,15 @@ class LoginView extends StatelessWidget {
                         );
                       } on FirebaseAuthException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.message ?? 'Error')),
+                          SnackBar(content: Text(e.message ?? 'Erro')),
                         );
                       }
                     }
                   },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.orange,
+                  ),
                   child: const Text('Login'),
                 ),
                 TextButton(
@@ -80,7 +85,7 @@ class LoginView extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => RegisterView()),
                     );
                   },
-                  child: const Text("Don't have an account? Register"),
+                  child: const Text("Não possui uma conta? Registre-se"),
                 ),
                 TextButton(
                   onPressed: () {
@@ -90,7 +95,7 @@ class LoginView extends StatelessWidget {
                           builder: (context) => ForgotPasswordView()),
                     );
                   },
-                  child: const Text("Forgot Password?"),
+                  child: const Text("Esqueceu sua senha?"),
                 ),
               ],
             ),
